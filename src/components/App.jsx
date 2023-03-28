@@ -12,7 +12,7 @@ export const App = () => {
   const [number, setNumber] = useState('');
 
   const dispatch = useDispatch();
-  const {contactsArr, isLoading, error} = useSelector(getContacts);
+  const {contactsArr} = useSelector(getContacts);
   const filterValue = useSelector(state => state.filter);
  
 
