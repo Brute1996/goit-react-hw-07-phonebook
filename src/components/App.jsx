@@ -1,19 +1,24 @@
-import { useState } from "react";
-import { nanoid } from 'nanoid'
+import { useEffect, useState } from "react";
 import { ContactForm } from "./ContactForm/ContactForm";
 import { ContactList } from "./ContactList/ContactList";
 import { Filter } from "./Filter/Filter";
 import { useDispatch, useSelector } from "react-redux";
-import { addContact as addContactAction, deleteContact as deleteContactAction, getContacts } from "./store/contacts/contactSlice";
+import { getContacts } from "./store/contacts/contactSlice";
+import { fetchContacts, postContact, deleteContact as deleteContactAPI } from "./store/contacts/api";
 
 
 export const App = () => {
   const [name, setName] = useState('');
   const [number, setNumber] = useState('');
 
-  const contacts = useSelector(getContacts);
-  const filterValue = useSelector(state => state.filter);
   const dispatch = useDispatch();
+  const {contactsArr, isLoading, error} = useSelector(getContacts);
+  const filterValue = useSelector(state => state.filter);
+ 
+
+  useEffect(() => {
+    dispatch(fetchContacts());
+  }, [dispatch]);
 
 
   const handleChange = (e) => {
@@ -36,18 +41,17 @@ export const App = () => {
   const addContact = (e) => {
   e.preventDefault();
 
-  if (contacts.find(contact => contact.name === name)) {
+  if (contactsArr.find(contact => contact.name === name)) {
     e.target.reset()
     return alert(`${name} already in contacts.`)
   }
 
   const newContact = {
     name: name,
-    number: number,
-    id: nanoid(),
-  };
+    phone: number,
+    };
   
-    dispatch(addContactAction(newContact))
+    dispatch(postContact(newContact))
   
     e.target.reset()
   
@@ -56,19 +60,14 @@ export const App = () => {
   const filteredContacts = () => {
     const normlizeFilter = filterValue.toLowerCase();
     
-    return contacts.filter(contact => contact.name.toLowerCase().includes(normlizeFilter));
+    
+    return contactsArr.filter(contact => contact.name.toLowerCase().includes(normlizeFilter))
   };
 
   const deleteContact = (contactId) => {
 
-    dispatch(deleteContactAction(contactId));
+    dispatch(deleteContactAPI(contactId));
   };
-
-  // add contacts to localstor
-  // useEffect(() => {
-  //   localStorage.setItem('savedContacts', JSON.stringify(contacts))
-  // }, [contacts]);
-
 
   return (
     <div
